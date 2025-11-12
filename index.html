@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 病歷小幫手</title>
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; line-height: 1.6; max-width: 700px; margin: 20px auto; padding: 10px; }
+        textarea { width: 100%; height: 150px; font-size: 16px; }
+        button { font-size: 16px; padding: 10px 15px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 15px; background-color: #f4f4f4; border-radius: 8px; white-space: pre-wrap; /* 讓換行符號生效 */ }
+        #loading { display: none; color: #888; }
+    </style>
+</head>
+<body>
+    <h1>AI 病歷小幫手</h1>
+    <p>請輸入病患的主訴、生命體徵或關鍵字：</p>
+
+    <textarea id="prompt-input" placeholder="例如：Patient presents with 2-day history of cough, fever 38.5C, and headache..."></textarea>
+
+    <button id="generate-button">產生 SOAP 病歷</button>
+
+    <div id="loading">AI 思考中...</div>
+
+    <h2>AI 產生的結果：</h2>
+    <div id="result"></div>
+
+    <script>
+        // 這就是您的前端 JavaScript
+        document.getElementById('generate-button').addEventListener('click', async () => {
+            const promptInput = document.getElementById('prompt-input');
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+
+            const userPrompt = promptInput.value;
+
+            if (!userPrompt) {
+                alert('請先輸入內容！');
+                return;
+            }
+
+            // 顯示「載入中...」並清空舊結果
+            loadingDiv.style.display = 'block';
+            resultDiv.innerText = '';
+
+            try {
+                // 關鍵！我們將請求"發送"到我們自己的後端 API
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: userPrompt }), // 將使用者的輸入包成 JSON
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP 錯誤! 狀態: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // 將 AI 回傳的結果顯示在畫面上
+                resultDiv.innerText = data.text;
+
+            } catch (error) {
+                console.error('Fetch 錯誤:', error);
+                resultDiv.innerText = '發生錯誤，請查看 console。';
+            } finally {
+                // 隱藏「載入中...」
+                loadingDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
