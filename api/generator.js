@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     try {
         // 呼叫 Gemini AI
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-        
+
         // 這裡可以客製化您的提示
         const fullPrompt = `
             You are a professional medical assistant. 
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
         const result = await model.generateContent(fullPrompt);
         const response = await result.response;
         const text = response.text();
-        
+
         // 將 AI 生成的純文字結果回傳給前端
         res.status(200).json({ text: text });
 
